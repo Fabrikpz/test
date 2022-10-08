@@ -1,14 +1,20 @@
-let soldier, enemies, bullets, bullet , mines, x, y;
+let soldier, enemies, bullets, bullet , mines, powerUp, x, y;
 let bg;
 let y1 = 0;
 let y2;
-let scrollSpeed = 4;
+let scrollSpeed = 1;
 
 function preload(){
     bg = loadImage("./assets/fondo.png");
 
     bullets = new Group();
     bullets.addImg("./assets/bullet.png");
+
+    powerUps = new Group();
+    powerUps.addImg("./assets/powerupimg.png");
+
+    mines = new Group();
+    mines.addImg("./assets/mine.png");
 }
 
 function setup() {
@@ -18,13 +24,22 @@ function setup() {
     soldierMoves();
     Enemies();
     EnemiesMoves();
-
+    Mines();
+    setInterval(powerUpGenerate, 20000);
+    /*soldier.overlap(enemies, (soldier, enemy) => {
+        soldier.remove();
+        // FAILED MISSION
+    });*/
+    bullets.overlap(enemies, (bullet, enemy) => {
+        enemy.remove();
+        bullet.remove();
+    });
     y2 = width;
 }
 
 function draw(){
-    image(bg, 0, y1, 800, 800);
-	image(bg, 0, y2, 800, 800);
+    image(bg, 0, -y1, 800, 800);
+	image(bg, 0, -y2, 800, 800);
 
 	y1 -= scrollSpeed;
 	y2 -= scrollSpeed;
@@ -37,7 +52,8 @@ function draw(){
 	}
 
     Limits();
-    Mines();
+
+    //enemies.overlap(bullet, Kill);
     //enemies.vel.x = x;
 }
 
@@ -62,6 +78,7 @@ function Limits(){
     }
 }
 
+//generación de enemigos
 function Enemies(){
     enemies = new Group();
     enemies.diameter = 30;
@@ -70,20 +87,37 @@ function Enemies(){
 	enemies.amount = 7;
 }
 
+//generación de minas
 function Mines(){
-    mines = new Group();
     mines.diameter = 30;
     mines.x = () => random(0, width);
-	mines.y = () => random(0, height);
-	mines.amount = 15;
+	mines.y = () => random(0, height-100);
+	mines.amount = 10;
+    mines.vel.y = 1;
+    mines.removeColliders();    
 }
 
 function EnemiesMoves(){
     enemies.vel.y = 3;
 }
 
+//funcion que genera las balas del soldado principal
 function Bullets(){
-    bullet = new bullets.Sprite(soldier.x, soldier.y+50);
-    bullet.vel.y = 15;
-    bullet.life = 50; 
+    bullet = new bullets.Sprite(soldier.x, soldier.y-50);
+    bullet.vel.y = -10;
+    bullet.life = 75;
+    bullet.removeColliders();    
+}
+
+//genera el powerup
+function powerUpGenerate(){
+    powerUp = new powerUps.Sprite(random(width), random(height-100));
+    
+}
+
+function soldierPowerUp(){
+    soldier.overlap(powerUp, powerUpBurst);
+        function powerUpBurst(soldier, powerUp){
+        powerUp.remove();
+        }
 }
