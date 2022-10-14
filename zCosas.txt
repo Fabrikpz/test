@@ -1,0 +1,1 @@
+https://p5play.org/docs/classes/SpriteAnimation.html#prop-visible
