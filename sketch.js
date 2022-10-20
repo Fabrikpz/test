@@ -1,4 +1,6 @@
 let soldier, soldieranimation, enemies, bullets, bullet2, bullet3, bullet , mines, explotion, powerUp, auxpowerUp, x, y;
+let soldier1, soldier2, soldier3, soldier4, soldier5;
+let enemy1, enemy2, enemy3, enemy4, enemy5;
 let bg, bg2;
 let botiquines, vacunas, curitas;
 let y1 = 0;
@@ -11,8 +13,17 @@ function preload(){
     bg2 = loadImage("./assets/fondo2.png");
     bg3 = loadImage("./assets/gameover.png");
 
-    /*soldier = new Sprite(400, 770, 30, 30, "dynamic");
-    soldier.addAnimation("./assets/soldierr.png", 5);*/
+    soldier = new Sprite(400, 730, 30, 30, "dynamic");
+
+    soldier1 = loadImage("./assets/soldier1.png");
+    soldier2 = loadImage("./assets/soldier2.png");
+    soldier4 = loadImage("./assets/soldier4.png");
+
+    enemy1 = loadImage("./assets/enemy1.png");
+    enemy2 = loadImage("./assets/enemy2.png");
+    enemy3 = loadImage("./assets/enemy3.png");
+    enemy4 = loadImage("./assets/enemy4.png");
+    enemy5 = loadImage("./assets/enemy5.png");
 
     enemies = new Group();
 
@@ -39,6 +50,8 @@ function preload(){
 
 function setup() {
     createCanvas(800, 800);
+    soldier.addAni("soldier", soldier1, soldier2, soldier4);
+    enemies.addAni("enemies", enemy1, enemy2, enemy3, enemy4, enemy5);
     setInterval(Bullets, 1000);
     soldierMoves();
     Enemies();
@@ -92,19 +105,17 @@ function draw(){
     }
     
     Limits();
-    //enemies.vel.x = x;
-}
-
-function soldierMoves(){
-    soldier = new Sprite(400, 770, 30, 30, "dynamic");
-    soldier.shapeColor = "green";
-    //soldier.vel.x = x * -1;
 }
 
 window.addEventListener("devicemotion", function(e){
     x = parseInt(e.accelerationIncludingGravity.x);
     //y = parseInt(e.accelerationIncludingGravity.y);
 })
+
+function soldierMoves(){
+    soldier.shapeColor = "green";
+    //soldier.vel.x = x * -1;
+}
 
 //función pa que si pasa de la izq de vaya pa la derecha el soldado.
 function Limits(){
@@ -136,7 +147,7 @@ function Limits(){
 function Enemies(){
     enemies.diameter = 30;
     enemies.x = () => random(0, width);
-	enemies.y = () => random(0, 500);
+	enemies.y = () => random(-500, 0);
 	enemies.amount = 7;
 }
 
@@ -178,10 +189,9 @@ function curitasGenerate(){
 
 //funcion que genera las balas del soldado principal
 function Bullets(){
-    bullet = new bullets.Sprite(soldier.x, soldier.y-50);
+    bullet = new bullets.Sprite(soldier.x+18, soldier.y-50);
     bullet.vel.y = -10;
     bullet.life = 75;
-    bullets.removeColliders();
 }
 
 //cuando agarra el powerup, dispara 3 balas
@@ -205,6 +215,5 @@ function powerUpGenerate(){
 function powerUpRemove(){
     powerUp.overlap(soldier, () => {
         powerUp.remove();
-        console.log(siisis);
     });
 }
