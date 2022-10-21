@@ -7,13 +7,15 @@ let y1 = 0;
 let y2;
 let scrollSpeed = 1;
 let score = 0;
+let timer = 60;
+let curations = 0;
 
 function preload(){
     bg = loadImage("./assets/fondo1.png");
     bg2 = loadImage("./assets/fondo2.png");
     bg3 = loadImage("./assets/gameover.png");
 
-    soldier = new Sprite(400, 730, 30, 30, "dynamic");
+    //soldier = new Sprite(400, 730, 30, 30, "dynamic");
 
     soldier1 = loadImage("./assets/soldier1.png");
     soldier2 = loadImage("./assets/soldier2.png");
@@ -46,6 +48,8 @@ function preload(){
 
     vacunas = new Group();
     //vacunas = loadImage("./assets/vacuna.png");
+
+    soldier = new Sprite(400, 730, 30, 30, "dynamic");
 }
 
 function setup() {
@@ -80,6 +84,16 @@ function setup() {
         powerUp.remove();
         threeShots();
     });
+    soldier.overlap(curitas, (soldier, curita)=>{
+        console.log("curita agarrada");
+        curita.remove();
+        curations++;
+    })
+    soldier.overlap(botiquines, (soldier, botiquin)=>{
+        console.log("botiquin agarrado");
+        botiquin.remove();
+        curations++;
+    })
     y2 = width;
 }
 
@@ -97,13 +111,35 @@ function draw(){
 		y2 = width;
 	}
     
+    //contador de kills
     textSize(30);
     fill(255);
     textFont('Courier');
     if (enemies.length > 0) {
-        text("kills: " + score, 600, 30);
+        text("kills: " + score, 600, 95);
     }
-    
+
+    //curaciones recogidas
+    textSize(20);
+    text("Curaciones recogidas: " + curations, 520, 60)
+    //tiempo restante
+    textSize(20);
+    text("Tiempo restante: " + timer, 550, 30);
+
+    if (frameCount % 60 == 0 && timer > 0) { 
+        timer--;
+    }
+
+    if(timer === 0 && curations < 10){
+        image(bg3, 0, 0, 800, 800);
+        soldier.remove();
+        mines.remove();
+        enemies.remove();
+        botiquines.remove();
+        curitas.remove();
+        bullets.remove();
+    }
+
     Limits();
 }
 
@@ -141,6 +177,22 @@ function Limits(){
             enemies[j].x = random(width);
         }
     }
+
+    for(let j= 0; j < botiquines.length; j++){
+        if(botiquines[j].y >= 800){
+            botiquines[j].y = -10;
+            botiquines[j].x = random(width);
+        }
+    }
+
+    for(let j= 0; j < curitas.length; j++){
+        if(curitas[j].y >= 800){
+            curitas[j].y = -10;
+            curitas[j].x = random(width);
+        }
+    }
+
+
 }
 
 //generación de enemigos
@@ -156,7 +208,7 @@ function Mines(){
     mines.diameter = 30;
     mines.x = () => random(0, width);
 	mines.y = () => random(0, height-100);
-	mines.amount = 10;
+	mines.amount = 8;
     mines.vel.y = 1;
     for(let i = 0; i < mines.length; i++){
         mines[i].removeColliders();
@@ -170,7 +222,7 @@ function EnemiesMoves(){
 function botiquinesGenerate(){
     botiquines.x = () => random(0,width);
     botiquines.y = () => random(0,height-100);
-    botiquines.amount = 1;
+    botiquines.amount = 2;
     botiquines.vel.y = 1;
     for(let i = 0; i < botiquines.length; i++){
         botiquines[i].removeColliders();
@@ -180,7 +232,7 @@ function botiquinesGenerate(){
 function curitasGenerate(){
     curitas.x = () => random(0,width);
     curitas.y = () => random(0,height-100);
-    curitas.amount = 1;
+    curitas.amount = 4;
     curitas.vel.y = 1;
     for(let i = 0; i < curitas.length; i++){
         curitas[i].removeColliders();
