@@ -1,25 +1,34 @@
-let soldier, soldieranimation, enemies, bullets, bullet2, bullet3, bullet , mines, explotion, powerUp, auxpowerUp, x, y;
+let soldieranimation, enemies, bullets, bullet2, bullet3, bullet , mines, powerUp, auxpowerUp, x, y;
 let soldier1, soldier2, soldier3, soldier4, soldier5;
 let enemy1, enemy2, enemy3, enemy4, enemy5;
 let bg, bg2;
+let button; 
 let botiquines, vacunas, curitas;
+let soldier;
 let y1 = 0;
 let y2;
+let playing = false;
 let scrollSpeed = 1;
 let score = 0;
 let timer = 60;
 let curations = 0;
+let gameover = false;
+let explotion;
 
 function preload(){
     bg = loadImage("./assets/fondo1.png");
     bg2 = loadImage("./assets/fondo2.png");
-    bg3 = loadImage("./assets/gameover.png");
+    bg3 = loadImage("./assets/missionfailed.png");
+
+    button = loadImage("./assets/buttonplay.png");
 
     //soldier = new Sprite(400, 730, 30, 30, "dynamic");
 
-    soldier1 = loadImage("./assets/soldier1.png");
-    soldier2 = loadImage("./assets/soldier2.png");
-    soldier4 = loadImage("./assets/soldier4.png");
+    soldier1 = loadImage("./assets/soldado.png");
+    soldier2 = loadImage("./assets/soldado2.png");
+    soldier3 = loadImage("./assets/soldado3.png");
+    soldier4 = loadImage("./assets/soldado4.png");
+    soldier5 = loadImage("./assets/soldado5.png");
 
     enemy1 = loadImage("./assets/enemy1.png");
     enemy2 = loadImage("./assets/enemy2.png");
@@ -38,7 +47,7 @@ function preload(){
     mines = new Group();
     mines.addImg("./assets/mine.png");
 
-    explotion = loadImage("./assets/explotion.gif");
+    explotion = createImg("./assets/explotion.gif");
 
     botiquines = new Group();
     botiquines.addImg("./assets/botiquin.png");
@@ -49,14 +58,14 @@ function preload(){
     vacunas = new Group();
     //vacunas = loadImage("./assets/vacuna.png");
 
-    soldier = new Sprite(400, 730, 30, 30, "dynamic");
 }
 
 function setup() {
     createCanvas(800, 800);
-    soldier.addAni("soldier", soldier1, soldier2, soldier4);
+    soldier = new Sprite(400, 730, 30, 30, "dynamic");
     enemies.addAni("enemies", enemy1, enemy2, enemy3, enemy4, enemy5);
-    setInterval(Bullets, 1000);
+    soldier.addAni("soldier", soldier1, soldier2, soldier3, soldier4, soldier5);
+    //setInterval(Bullets, 1000);
     soldierMoves();
     Enemies();
     EnemiesMoves();
@@ -64,40 +73,74 @@ function setup() {
     botiquinesGenerate();
     curitasGenerate();
     setInterval(powerUpGenerate, 20000);
-    /*soldier.overlap(enemies, (soldier, enemy) => {
-        soldier.remove();
-        // FAILED MISSION
-    });*/
-    soldier.overlap(mines, (soldier, mine) => {
-        //image(explotion, soldier.x, soldier.y);
+    
+    soldier.overlaps(mines, (soldier, mine) => {
         console.log("BOOM");
         mine.remove();
         soldier.remove();
-        image(bg3, 0, 0, 800, 800);
+        Explotion();
+        setInterval(2000, gameover = true);
+        //gameover = true;
     });
-    bullets.overlap(enemies, (bullet, enemy) => {
+    soldier.overlaps(enemies, (soldier, enemy)=>{
+        
+        gameover = true;
+    })
+    bullets.overlaps(enemies, (bullet, enemy) => {
         enemy.remove();
         bullet.remove();
         score += 1;
     });
-    soldier.overlap(powerUps, (soldier, powerUp)=>{
+    soldier.overlaps(powerUps, (soldier, powerUp)=>{
         powerUp.remove();
         threeShots();
     });
-    soldier.overlap(curitas, (soldier, curita)=>{
+    mines.overlaps(botiquines, (mine, botiquin)=>{
+        mine.remove();
+        botiquin.remove();
+        Explotion();
+    });
+    mines.overlaps(curitas, (mine, curita)=>{
+        mine.remove();
+        curita.remove();
+        Explotion();
+    });
+    soldier.overlaps(curitas, (soldier, curita)=>{
         console.log("curita agarrada");
         curita.remove();
         curations++;
     })
-    soldier.overlap(botiquines, (soldier, botiquin)=>{
+    soldier.overlaps(botiquines, (soldier, botiquin)=>{
         console.log("botiquin agarrado");
         botiquin.remove();
         curations++;
     })
+    enemies.overlaps(mines, (enemy, mine)=>{
+        enemy.remove();
+        mine.remove();
+        Explotion();
+    })
     y2 = width;
 }
 
-function draw(){
+function menu(){
+    button = createButton('Play');
+	button.position(61, 555);
+	button.mousePressed(() => playing=true);
+}
+
+function gameOver(){
+    image(bg3, 0, 0, 800, 800);
+    soldier.remove();
+    mines.remove();
+    enemies.remove();
+    botiquines.remove();
+    curitas.remove();
+    bullets.remove();
+    powerUps.remove();
+
+}
+function ingame(){
     image(bg, 0, -y1, 800, 800);
 	image(bg2, 0, -y2, 800, 800);
 
@@ -131,16 +174,24 @@ function draw(){
     }
 
     if(timer === 0 && curations < 10){
-        image(bg3, 0, 0, 800, 800);
-        soldier.remove();
-        mines.remove();
-        enemies.remove();
-        botiquines.remove();
-        curitas.remove();
-        bullets.remove();
+        gameOver();
     }
 
     Limits();
+}
+
+function draw(){
+    if (playing) {
+		ingame();
+        button.remove();
+	}
+    if (gameover) {
+		gameOver();
+	}
+	else{
+		menu();
+	}
+    drawSprites();
 }
 
 window.addEventListener("devicemotion", function(e){
@@ -149,7 +200,6 @@ window.addEventListener("devicemotion", function(e){
 })
 
 function soldierMoves(){
-    soldier.shapeColor = "green";
     //soldier.vel.x = x * -1;
 }
 
@@ -195,6 +245,11 @@ function Limits(){
 
 }
 
+function Explotion(){
+    console.log("hola")
+    explotion.position(soldier.x-10, soldier.y);
+} 
+
 //generación de enemigos
 function Enemies(){
     enemies.diameter = 30;
@@ -206,13 +261,10 @@ function Enemies(){
 //generación de minas
 function Mines(){
     mines.diameter = 30;
-    mines.x = () => random(0, width);
-	mines.y = () => random(0, height-100);
+    mines.x = () => soldier.x;
+	mines.y = () => random(0, height-300);
 	mines.amount = 8;
     mines.vel.y = 1;
-    for(let i = 0; i < mines.length; i++){
-        mines[i].removeColliders();
-    }
 }
 
 function EnemiesMoves(){
@@ -220,23 +272,17 @@ function EnemiesMoves(){
 }
 
 function botiquinesGenerate(){
-    botiquines.x = () => random(0,width);
-    botiquines.y = () => random(0,height-100);
+    botiquines.x = () => random(0, 800);
+    botiquines.y = () => random(-500,0);
     botiquines.amount = 2;
     botiquines.vel.y = 1;
-    for(let i = 0; i < botiquines.length; i++){
-        botiquines[i].removeColliders();
-    }
 }
 
 function curitasGenerate(){
     curitas.x = () => random(0,width);
-    curitas.y = () => random(0,height-100);
-    curitas.amount = 4;
+    curitas.y = () => random(-500,0);
+    curitas.amount = 3;
     curitas.vel.y = 1;
-    for(let i = 0; i < curitas.length; i++){
-        curitas[i].removeColliders();
-    }
 }
 
 //funcion que genera las balas del soldado principal
@@ -244,6 +290,7 @@ function Bullets(){
     bullet = new bullets.Sprite(soldier.x+18, soldier.y-50);
     bullet.vel.y = -10;
     bullet.life = 75;
+    bullet.removeColliders();
 }
 
 //cuando agarra el powerup, dispara 3 balas
@@ -265,7 +312,7 @@ function powerUpGenerate(){
 }
 
 function powerUpRemove(){
-    powerUp.overlap(soldier, () => {
+    powerUp.overlapped (soldier, () => {
         powerUp.remove();
     });
 }
